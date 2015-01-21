@@ -28,7 +28,7 @@ extra-libs := libcrypt
 extra-libs-others := $(extra-libs)
 
 libcrypt-routines := crypt-entry md5-crypt sha256-crypt sha512-crypt crypt \
-		     crypt_util
+		     crypt_util stribog-crypt
 
 tests := cert md5c-test sha256c-test sha512c-test badsalttest
 
@@ -42,9 +42,9 @@ CPPFLAGS-sha512-crypt.c = -DUSE_NSS -I$(shell nss-config --includedir)
 CPPFLAGS-md5-crypt.c = -DUSE_NSS -I$(shell nss-config --includedir)
 LDLIBS-crypt.so = -lfreebl3
 else
-libcrypt-routines += md5 sha256 sha512
+libcrypt-routines += md5 sha256 sha512 stribog
 
-tests += md5test sha256test sha512test
+tests += md5test sha256test sha512test stribogtest
 
 # The test md5test-giant uses up to 400 MB of RSS and runs on a fast
 # machine over a minute.
@@ -57,11 +57,13 @@ ifneq ($(nss-crypt),yes)
 md5-routines := md5 $(filter md5%,$(libcrypt-sysdep_routines))
 sha256-routines := sha256 $(filter sha256%,$(libcrypt-sysdep_routines))
 sha512-routines := sha512 $(filter sha512%,$(libcrypt-sysdep_routines))
+stribog-routines := stribog $(filter stribog%,$(libcrypt-sysdep_routines))
 
 $(objpfx)md5test: $(patsubst %, $(objpfx)%.o,$(md5-routines))
 $(objpfx)md5test-giant: $(patsubst %, $(objpfx)%.o,$(md5-routines))
 $(objpfx)sha256test: $(patsubst %, $(objpfx)%.o,$(sha256-routines))
 $(objpfx)sha512test: $(patsubst %, $(objpfx)%.o,$(sha512-routines))
+$(objpfx)stribogtest: $(patsubst %, $(objpfx)%.o,$(stribog-routines))
 endif
 
 ifeq (yes,$(build-shared))

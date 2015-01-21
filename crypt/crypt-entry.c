@@ -51,6 +51,9 @@ extern char *__sha256_crypt (const char *key, const char *salt);
 extern char *__sha512_crypt_r (const char *key, const char *salt,
 			       char *buffer, int buflen);
 extern char *__sha512_crypt (const char *key, const char *salt);
+extern char *__stribog_crypt_r (const char *key, const char *salt,
+			       char *buffer, int buflen);
+extern char *__stribog_crypt (const char *key, const char *salt);
 
 /* Define our magic string to mark salt for MD5 encryption
    replacement.  This is meant to be the same as for other MD5 based
@@ -62,6 +65,9 @@ static const char sha256_salt_prefix[] = "$5$";
 
 /* Magic string for SHA512 encryption.  */
 static const char sha512_salt_prefix[] = "$6$";
+
+/* Magic string for Stribog encryption.  */
+static const char stribog_salt_prefix[] = "$7$";
 
 /* For use by the old, non-reentrant routines (crypt/encrypt/setkey)  */
 extern struct crypt_data _ufc_foobar;
@@ -102,6 +108,11 @@ __crypt_r (key, salt, data)
   /* Try to find out whether we have to use SHA512 encryption replacement.  */
   if (strncmp (sha512_salt_prefix, salt, sizeof (sha512_salt_prefix) - 1) == 0)
     return __sha512_crypt_r (key, salt, (char *) data,
+			     sizeof (struct crypt_data));
+			     
+  /* Try to find out whether we have to use Stribog encryption replacement.  */
+  if (strncmp (stribog_salt_prefix, salt, sizeof (stribog_salt_prefix) - 1) == 0)
+    return __stribog_crypt_r (key, salt, (char *) data,
 			     sizeof (struct crypt_data));
 #endif
 
@@ -166,6 +177,10 @@ crypt (key, salt)
   /* Try to find out whether we have to use SHA512 encryption replacement.  */
   if (strncmp (sha512_salt_prefix, salt, sizeof (sha512_salt_prefix) - 1) == 0)
     return __sha512_crypt (key, salt);
+    
+  /* Try to find out whether we have to use Stribog encryption replacement.  */
+  if (strncmp (stribog_salt_prefix, salt, sizeof (sha512_salt_prefix) - 1) == 0)
+    return __stribog_crypt (key, salt);
 #endif
 
   return __crypt_r (key, salt, &_ufc_foobar);
